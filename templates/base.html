@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* Add some styles for the grid and cells */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      width: 500px;
+      height: 500px;
+      border: 1px solid black;
+    }
+    .cell {
+      background-color: white;
+      border: 1px solid black;
+    }
+    .cell.on {
+      background-color: black;
+    }
+    .cell.green {
+      background-color: lightgreen;
+    }
+    .cell.red {
+      background-color: tomato;
+    }
+  </style>
+</head>
+<body>
+  <div class="level"></div>
+  <!-- Create the grid -->
+  <div class="grid"></div>
+  <!-- Add a message area to display the game status -->
+  <div id="message"></div>
+  <!-- Add a script to handle the game logic -->
+  <script>
+    // Constants
+
+    const TURN_ON_DURATION = 1000;  // duration in milliseconds to turn on cells
+
+    // Get a reference to the grid, message area, and start button
+    let levelText = document.querySelector(".level");
+    const grid = document.querySelector(".grid");
+    const message = document.querySelector("#message");
+
+    // Initialize the game
+    let score = 0;
+    let cells = [];
+    let playerCells = [];
+    const levels = [{numCellsToTurnOn:2,gridSize:4},{numCellsToTurnOn: 4,gridSize: 4 },{numCellsToTurnOn:4,gridSize:6},{numCellsToTurnOn:6,gridSize:6}]
+    let currentLevel = 0;
+    startGame(true)
+
+    function startGame(newGame) {
+
+      //clear board & data
+      cells = [];
+      grid.innerHTML = "";
+      playerCells = [];
+      if(newGame)
+        currentLevel = 0
+
+      levelText.innerHTML = currentLevel
+
+      const level = levels[currentLevel]
+      generateCells(level.gridSize)
+      chooseRandomCellToTurnOn(level.numCellsToTurnOn,level.gridSize)
+      setTimeout(turnOffCells, TURN_ON_DURATION);
+    }
+
+    function generateCells(gridSize){
+      console.log('gridSize',gridSize)
+      for (let i = 0; i < gridSize ** 2; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = i.toString();
+        grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`
+        grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`
+        grid.appendChild(cell);
+      }
+    }
+
+    function chooseRandomCellToTurnOn(numCellsToTurnOn,gridSize){
+      for (let i = 0; i < numCellsToTurnOn; i++) {
+        const index = Math.floor(Math.random() * gridSize ** 2);
+        cells.push(index);
+        // Turn on the cell
+        grid.children[index].classList.add("on");
+      }
+    }
+
+    function turnOffCells() {
+      // Turn off the cells
+      cells.forEach((cell) => {
+        grid.children[cell].classList.remove("on");
+      });
+      // Enable cell clicking
+      grid.addEventListener("click", handleCellClick);
+      // Update the message
+      message.textContent = "Remember the cells";
+    }
+
+    function handleCellClick(event) {
+      // Get the clicked cell
+      const cell = event.target;
+      playerCells.push(Number(cell.dataset.index))
+
+      if (cells.indexOf(Number(cell.dataset.index)) > -1) {
+        cell.classList.add('green')
+      }else {
+        cell.classList.add('red')
+        lose()
+      }
+
+      checkWinOrLose()
+    }
+
+    function checkWinOrLose(){
+      if (playerCells.length === cells.length) {
+        // Check if the player's cells match the turned on cells
+        const correct = playerCells.every(playerCell => {
+          return cells.some(cell => cell === playerCell);
+        });
+        if (correct) {
+          // Increment the score
+          score++;
+          // Update the message
+          message.textContent = "Correct! Your score is now " + score + ". Click the start button to play again.";
+          // Enable the start button
+          // Remove the click event listener
+          grid.removeEventListener("click", handleCellClick);
+
+          loadNextLevel()
+        }
+      }
+    }
+
+    function loadNextLevel(){
+      if(currentLevel === levels.length - 1){
+        alert('You Won!')
+      }else {
+        currentLevel++;
+        setTimeout(()=>startGame(),1000)
+      }
+    }
+
+    function lose(){
+      message.textContent = "Incorrect. The correct cells were: " + JSON.stringify(cells) + ". Your score is " + score + ".";
+      // Enable the start button
+      // Remove the click event listener
+      grid.removeEventListener("click", handleCellClick);
+      setTimeout(()=>startGame(true),1000)
+    }
+
+  </script>
+</body>
+</html>

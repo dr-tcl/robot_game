@@ -54,7 +54,6 @@ class Game:
     @classmethod
     def robot_move(cls, direction):
         robot = Robot.objects.first()
-        print(robot)
         if robot is None:
             return False, "you haven't created robot"
 

@@ -8,7 +8,7 @@ class Game:
 
     @staticmethod
     def _get_dinosaurs_location():
-        dinosaurs = Dinosaurs.objects.filter(is_live=True)
+        dinosaurs = Dinosaurs.objects.filter()
         return [(i.width, i.height) for i in dinosaurs]
 
     @classmethod
@@ -18,26 +18,32 @@ class Game:
 
         return locX <= mapX and locY <= mapY
 
-    def create_dinosaurs(self, x, y):
+    @classmethod
+    def create_dinosaurs(cls, x, y):
+        if not isinstance(x, int) or not isinstance(y, int):
+            return False, "your x,y parameter must be integer"
         loc = (x, y)
-        if self._check_location_in_board_size(loc):
+        if cls._check_location_in_board_size(loc):
             Dinosaurs.objects.get_or_create(width=x, height=y)
-            return True
+            return True, "create dinosaur successfully"
         else:
-            return False
+            return False, "dinosaur location is not in map size"
 
-    def create_robot(self, x, y):
+    @classmethod
+    def create_robot(cls, x, y):
+        if not isinstance(x, int) or not isinstance(y, int):
+            return False, "your x,y parameter must be integer"
         loc = (x, y)
         robot = Robot.objects.first()
         if robot:
-            return False
-        if loc not in self._get_dinosaurs_location() \
-                and self._check_location_in_board_size(loc):
+            return False, "you create robot before"
+        if loc not in cls._get_dinosaurs_location() \
+                and cls._check_location_in_board_size(loc):
             robot = Robot.objects.create(width=x, height=y)
-            self._kill_dinosaurs(robot)
-            return True
+            cls._kill_dinosaurs(robot)
+            return True, "create robot successfully"
         else:
-            return False
+            return False, "robot location is not in map size or on dinosaurs location"
 
     @staticmethod
     def _kill_dinosaurs(robot: Robot):
@@ -45,10 +51,12 @@ class Game:
                                  Q(height=robot.height, width__in=[robot.width + 1, robot.width - 1])).update(
             is_live=False)
 
-    def robot_move(self, direction):
+    @classmethod
+    def robot_move(cls, direction):
         robot = Robot.objects.first()
+        print(robot)
         if robot is None:
-            return False
+            return False, "you haven't created robot"
 
         if direction.lower() == "up":
             robot.height += 1
@@ -59,12 +67,23 @@ class Game:
         elif direction.lower() == "left":
             robot.width -= 1
         else:
-            # input direction is incorrect
-            return False
+            return False, "input direction is incorrect"
 
         loc = (robot.width, robot.height)
-        if self._check_location_in_board_size(loc):
+        if loc in cls._get_dinosaurs_location():
+            return False, f"{direction} cell of robot get by dinosaur before"
+        if cls._check_location_in_board_size(loc):
             robot.save()
-            self._kill_dinosaurs(robot)
-            return True
-        return False
+            cls._kill_dinosaurs(robot)
+            return True, f"robot moved {direction} successfully"
+        return False, "robot cant move to out of board size"
+
+    def show_game_map(self):
+        robot = Robot.objects.first()
+        dinosaurs = Dinosaurs.objects.all()
+        map = [[None for i in range(self.BOARD_MAP_SIZE[1])] for i in range(self.BOARD_MAP_SIZE[0])]
+        if robot:
+            map[robot.height].insert(robot.width, "R")
+        for dinosaur in dinosaurs:
+            map[dinosaur.height].insert(dinosaur.width, "D")
+        return map

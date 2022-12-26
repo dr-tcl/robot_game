@@ -1,0 +1,52 @@
+body {
+    min-width: 500px;
+    min-height: 700px;
+    overflow: hidden;
+}
+
+.cellStyle {
+    display: inline-block;
+    width: 45px;
+    height: 45px;
+    line-height: 45px;
+    overflow: hidden;
+    background-color: #ededed;
+    border-radius: 4px;
+    text-align: center;
+    padding: 12px;
+}
+
+.cellStyle:hover {
+    background-color: gray;
+}
+
+.dinosuar {
+    width: 45px;
+    height: 45px;
+}
+
+
+.main {
+    font-size: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 100vh;
+}
+
+.formWrapper {
+
+}
+
+button {
+    margin-bottom: 5px;
+}
+
+button:hover {
+    opacity: 0.7;
+}
+
+button:active {
+    opacity: 0.3;
+}

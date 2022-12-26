@@ -11,6 +11,11 @@ class Game:
         dinosaurs = Dinosaurs.objects.filter()
         return [(i.width, i.height) for i in dinosaurs]
 
+    @staticmethod
+    def _get_robot_location():
+        dinosaurs = Dinosaurs.objects.filter()
+        return [(i.width, i.height) for i in dinosaurs]
+
     @classmethod
     def _check_location_in_board_size(cls, loc: tuple):
         mapX, mapY = cls.BOARD_MAP_SIZE
@@ -24,8 +29,13 @@ class Game:
             return False, "your x,y parameter must be integer"
         loc = (x, y)
         if cls._check_location_in_board_size(loc):
-            Dinosaurs.objects.get_or_create(width=x, height=y)
-            return True, "create dinosaur successfully"
+            if loc not in cls._get_robot_location():
+                obj, status = Dinosaurs.objects.get_or_create(width=x, height=y, is_live=False)
+            else:
+                obj, status = Dinosaurs.objects.get_or_create(width=x, height=y)
+            if status:
+                return True, "create dinosaur successfully"
+            return False, "you create dinosaur in this location before"
         else:
             return False, "dinosaur location is not in map size"
 
@@ -58,16 +68,17 @@ class Game:
             return False, "you haven't created robot"
 
         if direction.lower() == "up":
-            robot.height += 1
-        elif direction.lower() == "down":
             robot.height -= 1
+        elif direction.lower() == "down":
+            robot.height += 1
         elif direction.lower() == "right":
             robot.width += 1
         elif direction.lower() == "left":
             robot.width -= 1
         else:
             return False, "input direction is incorrect"
-
+        if robot.width < 1 or robot.height < 1:
+            return False, "robot cant move to out of board size"
         loc = (robot.width, robot.height)
         if loc in cls._get_dinosaurs_location():
             return False, f"{direction} cell of robot get by dinosaur before"
@@ -77,12 +88,18 @@ class Game:
             return True, f"robot moved {direction} successfully"
         return False, "robot cant move to out of board size"
 
-    def show_game_map(self):
+    @classmethod
+    def show_game_map(cls):
         robot = Robot.objects.first()
         dinosaurs = Dinosaurs.objects.all()
-        map = [[None for i in range(self.BOARD_MAP_SIZE[1])] for i in range(self.BOARD_MAP_SIZE[0])]
+        map = [["-" for i in range(cls.BOARD_MAP_SIZE[1])] for i in range(cls.BOARD_MAP_SIZE[0])]
+
         if robot:
-            map[robot.height].insert(robot.width, "R")
+            map[robot.height - 1][robot.width - 1] = "R"
         for dinosaur in dinosaurs:
-            map[dinosaur.height].insert(dinosaur.width, "D")
+            if dinosaur.is_live:
+                map[dinosaur.height - 1][dinosaur.width - 1] = "D"
+            else:
+                map[dinosaur.height - 1][dinosaur.width - 1] = "DD"
+
         return map

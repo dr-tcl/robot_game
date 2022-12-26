@@ -1,0 +1,51 @@
+.start-button {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    background-color: lightgreen;
+}
+.main-1 {
+    font-size: 20px;
+    display: grid;
+    grid-template-rows: 200px 200px 200px 200px; 
+    row-gap: 4px;
+    column-gap: 40px; 
+    margin: 40px 40px 40px 40px;    
+}
+button {
+     margin-bottom: 5px;
+}
+button:hover {
+    opacity: 0.7;
+}
+button:active {
+    background-color: gray;
+}
+button:visited {
+    background-color: darkred;
+}
+.button-1{
+     background-color: black;
+     color: white;        
+}
+
+.button-2{
+    background-color: rgb(143, 139, 139);
+    color: black;
+}
+.row-1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+.row-2{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+.row-3{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+.row-4{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;    
+}

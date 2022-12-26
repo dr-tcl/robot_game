@@ -8,6 +8,7 @@ class Game:
 
     @staticmethod
     def _get_dinosaurs_location():
+
         dinosaurs = Dinosaurs.objects.filter()
         return [(i.width, i.height) for i in dinosaurs]
 
@@ -18,13 +19,24 @@ class Game:
 
     @classmethod
     def _check_location_in_board_size(cls, loc: tuple):
+        """
+        this method is for validate location
+        :param loc:
+        :return:
+        """
         mapX, mapY = cls.BOARD_MAP_SIZE
         locX, locY = loc
 
         return locX <= mapX and locY <= mapY
 
     @classmethod
-    def create_dinosaurs(cls, x, y):
+    def create_dinosaurs(cls, x: int, y: int):
+        """
+        this method is for creating dinosaur
+        :param x:
+        :param y:
+        :return:
+        """
         if not isinstance(x, int) or not isinstance(y, int):
             return False, "your x,y parameter must be integer"
         loc = (x, y)
@@ -40,7 +52,13 @@ class Game:
             return False, "dinosaur location is not in map size"
 
     @classmethod
-    def create_robot(cls, x, y):
+    def create_robot(cls, x: int, y: int):
+        """
+        this method is for creating robot
+        :param x:
+        :param y:
+        :return:
+        """
         if not isinstance(x, int) or not isinstance(y, int):
             return False, "your x,y parameter must be integer"
         loc = (x, y)
@@ -57,12 +75,22 @@ class Game:
 
     @staticmethod
     def _kill_dinosaurs(robot: Robot):
+        """
+        this method is for kill dinosaurs
+        :param robot:
+        :return:
+        """
         Dinosaurs.objects.filter(Q(width=robot.width, height__in=[robot.height + 1, robot.height - 1]) |
                                  Q(height=robot.height, width__in=[robot.width + 1, robot.width - 1])).update(
             is_live=False)
 
     @classmethod
-    def robot_move(cls, direction):
+    def robot_move(cls, direction: str):
+        """
+        this method is for change robot location
+        :param direction:
+        :return:
+        """
         robot = Robot.objects.first()
         if robot is None:
             return False, "you haven't created robot"
@@ -90,6 +118,10 @@ class Game:
 
     @classmethod
     def show_game_map(cls):
+        """
+        this method is for show game board
+        :return:
+        """
         robot = Robot.objects.first()
         dinosaurs = Dinosaurs.objects.all()
         map = [["-" for i in range(cls.BOARD_MAP_SIZE[1])] for i in range(cls.BOARD_MAP_SIZE[0])]
